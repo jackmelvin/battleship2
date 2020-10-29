@@ -1,7 +1,7 @@
 package com.jm.battleship;
 import java.io.Serializable;
 
-import static com.jm.battleship.GamePlayActivity.GameManager.*;
+import static com.jm.battleship.GameManager.*;
 
 public class Cell implements Serializable {
 
@@ -47,7 +47,7 @@ public class Cell implements Serializable {
 	// Return HIT if there is a ship and MISS if there isn't
 	public String checkYourself() {
 		String result;
-		hit();
+		hit(null);
 		if (!hasShip()) {
 			result = MISS;
 		} else {
@@ -65,18 +65,17 @@ public class Cell implements Serializable {
 	}
 
 	//For printing enemy board
-	public void hit() {
+	public void hit(Ship shipToSet) {
+		if (isHit) {
+			return;
+		}
 		isHit = true;
+		if (!hasShip() && shipToSet != null) {
+			this.ship = shipToSet;
+		}
 		if (hasShip()) {
-			ship.addHitCell(this);
+			this.ship.addHitCell(this);
 		}
-	}
-	//For printing enemy board
-	public void hit(Ship s) {
-		isHit = true;
-		if (!hasShip()) {
-			ship = s;
-		}
-		ship.addHitCell(this);
+
 	}
 }

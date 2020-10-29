@@ -17,15 +17,25 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 public class PlaceShipActivity extends AppCompatActivity {
-
+    // game mode, play against computer or another player
+    private int mode;
+    // an array of views indicating player's ship for drag and drop placing
     private ImageView[] ivShips;
+    // touched ship, used for drag and drop and rotating ship
     private Ship selectedShip;
+    // indicating a ship is in being dragged but has not been dropped yet
     private boolean isDragging;
+    // dragging ship's head cell, used when drag and drop failed
     private Cell selectedShipOriginalLocation;
+    // player's board
     private Board board;
+    // a view to display player's board
     private BoardView boardView;
+    // Toast used to display a message to the player
     private Toast toast;
+    // measured size of a cell in boardView
     private float cellSize;
+    // start game button
     private Button btStart;
 
     @Override
@@ -33,6 +43,7 @@ public class PlaceShipActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_ship);
 
+        mode = getIntent().getIntExtra("mode", GameManager.MODE_VS_PLAYER);
         init();
     }
 
@@ -252,7 +263,7 @@ public class PlaceShipActivity extends AppCompatActivity {
             // Deselect ship
             selectedShip = null;
             // Place ships randomly
-            board.placeShipRandomly();
+            board.placeShipsRandomly();
 
             //Move ship views into BoardView
             for(int i = 0; i < board.getShips().size(); i++) {
@@ -284,6 +295,7 @@ public class PlaceShipActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             Intent intent = new Intent(PlaceShipActivity.this, GamePlayActivity.class);
+            intent.putExtra("mode", mode);
             intent.putExtra("board", board);
             startActivity(intent);
         }

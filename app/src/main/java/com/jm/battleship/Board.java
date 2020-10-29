@@ -3,7 +3,7 @@ package com.jm.battleship;
 import java.io.Serializable;
 import java.util.*;
 
-import static com.jm.battleship.GamePlayActivity.GameManager.*;
+import static com.jm.battleship.GameManager.*;
 
 public class Board implements Serializable {
 	// Board is constructed of SIZE * SIZE cells
@@ -42,7 +42,7 @@ public class Board implements Serializable {
 		return cells[x][y];
 	}
 
-	private boolean isOutOfBounds(int x, int y) {
+	boolean isOutOfBounds(int x, int y) {
 		return (x < 0 || x >= SIZE || y < 0 || y >= SIZE);
 	}
 
@@ -97,7 +97,7 @@ public class Board implements Serializable {
 		return true;
 	}
 
-	public void placeShipRandomly() {
+	public void placeShipsRandomly() {
 		Random rand = new Random();
 		for (Ship ship : ships) {
 			boolean success = false;
