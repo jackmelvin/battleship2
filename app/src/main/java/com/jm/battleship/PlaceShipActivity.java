@@ -256,17 +256,13 @@ public class PlaceShipActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
 //            myApp.playSoundEffect(MyApp.SOUND_ID_PLACE);
-            // Remove all placed ship
-            for (Ship ship : board.getShips()) {
-                ship.remove();
-            }
             // Deselect ship
             selectedShip = null;
             // Place ships randomly
             board.placeShipsRandomly();
 
             //Move ship views into BoardView
-            for(int i = 0; i < board.getShips().size(); i++) {
+            for(int i = 0; i < Board.NUMBER_OF_SHIPS; i++) {
                 //Remove original view
                 ViewGroup owner = (ViewGroup) ivShips[i].getParent();
                 owner.removeView(ivShips[i]);

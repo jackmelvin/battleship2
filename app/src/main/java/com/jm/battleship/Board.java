@@ -8,6 +8,7 @@ import static com.jm.battleship.GameManager.*;
 public class Board implements Serializable {
 	// Board is constructed of SIZE * SIZE cells
 	public static final int SIZE = 10;
+	public static final int NUMBER_OF_SHIPS = 5;
 	private Cell[][] cells;
 	// Holds all ships that a player has
 	private ArrayList<Ship> ships;
@@ -32,10 +33,10 @@ public class Board implements Serializable {
 		}
 		ships = new ArrayList<>();
 		ships.add(0, new Ship(0, CARRIER, 5));
-		ships.add(1, new Ship(0, BATTLESHIP, 4));
-		ships.add(2, new Ship(0, CRUISER, 3));
-		ships.add(3, new Ship(0, SUBMARINE, 3));
-		ships.add(4, new Ship(0, DESTROYER, 2));
+		ships.add(1, new Ship(1, BATTLESHIP, 4));
+		ships.add(2, new Ship(2, CRUISER, 3));
+		ships.add(3, new Ship(3, SUBMARINE, 3));
+		ships.add(4, new Ship(4, DESTROYER, 2));
 	}
 
 	public Cell getCell(int x, int y) {
@@ -100,6 +101,7 @@ public class Board implements Serializable {
 	public void placeShipsRandomly() {
 		Random rand = new Random();
 		for (Ship ship : ships) {
+			ship.remove();
 			boolean success = false;
 			while (!success) {
 				ship.setHorizontal(rand.nextBoolean());
@@ -113,6 +115,13 @@ public class Board implements Serializable {
 					headY = rand.nextInt(SIZE - ship.getSize() + 1);
 				}
 				success = placeShip(ship, cells[headX][headY]);
+				if (success) {
+					System.out.print("Ship " + ship.getId() + " placed at ");
+					for (Cell cell : ship.getLocation()) {
+						System.out.print(cell.getX() + "," + cell.getY() + "  ");
+					}
+					System.out.println("");
+				}
 			}
 		}
 	}
