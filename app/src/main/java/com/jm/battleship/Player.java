@@ -1,21 +1,40 @@
 package com.jm.battleship;
 
-import static com.jm.battleship.GameManager.*;
-
 public class Player extends AbstractPlayer {
 
-    public Player(String ip, int port, GamePlayActivity context, BoardView myBoardView, BoardView opponentBoardView) {
-        super(ip, port, context, myBoardView, opponentBoardView);
+    public Player(String ip, int port, GamePlayActivity context, Board myBoard, Board opponentBoard) {
+        super(ip, port, context, myBoard, opponentBoard);
     }
 
     @Override
     void shoot() {
+        displayMessage("YOUR TURN", "");
         activity.enableOpponentBoard();
     }
 
     @Override
     void _wait() {
+        displayMessage("OPPONENT'S TURN", "");
         activity.disableOpponentBoard();
+    }
+
+    @Override
+    void endGame(String result) {
+        if (result.equals(GameManager.WIN)) {
+            displayMessage("You win", "GGWP");
+            for (Ship ship : opponentBoard.getShips()) {
+                if (!ship.isSunk()) {
+                    processShootResult(ship.getName());
+                    break;
+                }
+            }
+            myApp.playSoundEffect(MyApp.SOUND_ID_WIN);
+        } else if (result.equals(GameManager.LOSE)) {
+            displayMessage("You lose", "LOSERRRRRR");
+            myApp.playSoundEffect(MyApp.SOUND_ID_LOSE);
+        }
+        myApp.pauseMusic();
+        isPlaying = false;
     }
 
     @Override

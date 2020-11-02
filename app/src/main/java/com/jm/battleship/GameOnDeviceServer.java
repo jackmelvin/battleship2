@@ -18,7 +18,7 @@ class GameOnDeviceServer implements Runnable {
 	@Override
 	public void run() {
 		ServerSocket serverSock = null;
-		while (serverSock == null) {
+		while (serverSock == null && port <= 65535) {
 			try {
 				serverSock = new ServerSocket(port);
 			} catch (BindException e) {

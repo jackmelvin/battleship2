@@ -24,10 +24,6 @@ import static com.jm.battleship.GameManager.WIN;
 public abstract class AbstractPlayer {
     // activity to display message and set board touch listener
     final GamePlayActivity activity;
-    // a view to display player's board
-    final BoardView myBoardView;
-    // a view to display opponent's board
-    final BoardView opponentBoardView;
     // the real player's board to display to the view
     final Board myBoard;
     // the real opponent's board to display to the view
@@ -50,16 +46,17 @@ public abstract class AbstractPlayer {
     boolean isPlaying = true;
     // save the last shot for calculating
     Cell lastShootCell;
+    // custom Application class for music and sound
+    MyApp myApp;
 
     // initialize things and set up server, start the game automatically when an object is created
-    public AbstractPlayer(String ip, int port, GamePlayActivity context, BoardView myBoardView, BoardView opponentBoardView) {
+    public AbstractPlayer(String ip, int port, GamePlayActivity context, Board myBoard, Board opponentBoard) {
         this.ip = ip;
         this.port = port;
         this.activity = context;
-        this.myBoardView = myBoardView;
-        this.myBoard = myBoardView.getBoard();
-        this.opponentBoardView = opponentBoardView;
-        this.opponentBoard = opponentBoardView.getBoard();
+        this.myBoard = myBoard;
+        this.opponentBoard = opponentBoard;
+        this.myApp = (MyApp) context.getApplication();
         setUpNetwork();
     }
 
@@ -67,7 +64,7 @@ public abstract class AbstractPlayer {
     private void setUpNetwork() {
         Thread readThread = new Thread(() -> {
             while (socket == null) {
-                activity.displayMessage("Trying to connect to server");
+                displayMessage("Trying to connect to server", "");
                 try {
                     socket = new Socket(ip, port);
                 } catch (IOException e) {
@@ -78,7 +75,7 @@ public abstract class AbstractPlayer {
                 }
             }
             try {
-                activity.displayMessage("Waiting for opponent to join");
+                displayMessage("Waiting for opponent to join", "");
                 writer = new PrintWriter(socket.getOutputStream());
                 reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 Thread playThread = new Thread(this::play);
@@ -111,35 +108,36 @@ public abstract class AbstractPlayer {
                 break;
             case SHOOT:
                 shoot();
-                displayMessage("YOUR TURN", "");
                 break;
             case WAIT:
                 _wait();
-                displayMessage("OPPONENT'S TURN", "");
                 break;
             case WIN:
-                displayMessage("You win", "GGWP");
-                isPlaying = false;
+                endGame(WIN);
                 break;
             case LOSE:
-                displayMessage("You lose", "LOSERRRRRR");
-                isPlaying = false;
+                endGame(LOSE);
                 break;
             //Shoot result
             case MISS:
+                myApp.playSoundEffect(MyApp.SOUND_ID_MISS);
+                processShootResult(command);
+                break;
             case CARRIER:
             case BATTLESHIP:
             case CRUISER:
             case SUBMARINE:
             case DESTROYER:
+                myApp.playSoundEffect(MyApp.SOUND_ID_HIT);
                 processShootResult(command);
                 break;
             default: // cell location in "row, column" format
                 checkShoot(command);
         }
-        myBoardView.invalidate();
-        opponentBoardView.invalidate();
+        activity.reDrawBoardViews();
     }
+
+    abstract void endGame(String result);
 
     // check the board for shoot result and write it to the game server
     void checkShoot(String cellLocation) {

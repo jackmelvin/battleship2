@@ -6,21 +6,17 @@ import android.media.MediaPlayer;
 class MediaManager {
 
     private Context mContext;
-    private int musicId;
     private MediaPlayer mediaPlayer;
 
     public MediaManager(Context context) {
         mContext = context;
-        musicId = R.raw.bg_music;
         mediaPlayer = new MediaPlayer();
     }
 
-    void load(int music_id) {
-        mediaPlayer = MediaPlayer.create(mContext, music_id);
-    }
-
-    void play() {
+    void play(int musicId) {
+        release();
         mediaPlayer = MediaPlayer.create(mContext, musicId);
+        mediaPlayer.setLooping(true);
         mediaPlayer.start();
     }
 
@@ -30,7 +26,13 @@ class MediaManager {
         }
     }
 
-    void releaseMediaPlayer() {
+    void resume() {
+        if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
+            mediaPlayer.start();
+        }
+    }
+
+    void release() {
         if(mediaPlayer != null) {
             if(mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();

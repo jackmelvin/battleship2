@@ -16,8 +16,8 @@ class ComputerPlayer extends AbstractPlayer {
     // directions to find the remaining cells of the ship
     private ArrayList<Integer> secondShootDir = new ArrayList<>(Arrays.asList(0, 1, 2, 3));
 
-    public ComputerPlayer(String ip, int port, GamePlayActivity context, BoardView myBoardView, BoardView opponentBoardView) {
-        super(ip, port, context, myBoardView, opponentBoardView);
+    public ComputerPlayer(String ip, int port, GamePlayActivity context, Board myBoard, Board opponentBoard) {
+        super(ip, port, context, myBoard, opponentBoard);
     }
 
     @Override
@@ -41,7 +41,6 @@ class ComputerPlayer extends AbstractPlayer {
                 if (opponentBoard.getCell(x, y).isHit()) {
                     continue;
                 }
-                System.out.println("Shoot randomly " + x + "," + y);
             } else if (nextHit == null) { //Second shoot after getting a cell hit
                 boolean success = false;
                 while (!success) {
@@ -90,7 +89,6 @@ class ComputerPlayer extends AbstractPlayer {
                             continue;
                     }
                     success = true;
-                    System.out.println("Second shoot " + x + "," + y);
                 }
             } else {
                 //Hit two cells in a row
@@ -100,15 +98,15 @@ class ComputerPlayer extends AbstractPlayer {
                 int nextX = nextHit.getX();
                 int nextY = nextHit.getY();
                 if (nextY == firstY) { //Shooting horizontally
+                    y = nextY;
                     if (nextX > firstX) { //Shooting to the right
-                        y = nextY;
-                        if (!opponentBoard.isOutOfBounds(nextX + 1, nextY) && !opponentBoard.getCell(nextX + 1, nextY).isHit()) {
+                        if (!opponentBoard.isOutOfBounds(nextX + 1, y) && !opponentBoard.getCell(nextX + 1, y).isHit()) {
                             x = nextX + 1;
                         } else {
                             x = firstX - 1;
                         }
                     } else { //Shooting to the left
-                        if (!opponentBoard.isOutOfBounds(nextX - 1, nextY) && !opponentBoard.getCell(nextX - 1, nextY).isHit()) {
+                        if (!opponentBoard.isOutOfBounds(nextX - 1, y) && !opponentBoard.getCell(nextX - 1, y).isHit()) {
                             x = nextX - 1;
                         } else {
                             x = firstX + 1;
@@ -118,21 +116,21 @@ class ComputerPlayer extends AbstractPlayer {
                 if (nextX == firstX) { //Shooting vertically
                     x = nextX;
                     if (nextY > firstY) { //Shooting to the bottom
-                        if (!opponentBoard.isOutOfBounds(nextX, nextY + 1) && !opponentBoard.getCell(nextX, nextY + 1).isHit()) {
+                        if (!opponentBoard.isOutOfBounds(x, nextY + 1) && !opponentBoard.getCell(x, nextY + 1).isHit()) {
                             y = nextY + 1;
                         } else {
                             y = firstY - 1;
                         }
                     } else { //Shooting to the top
-                        if (!opponentBoard.isOutOfBounds(nextX, nextY - 1) && !opponentBoard.getCell(nextX, nextY - 1).isHit()) {
+                        if (!opponentBoard.isOutOfBounds(x, nextY - 1) && !opponentBoard.getCell(x, nextY - 1).isHit()) {
                             y = nextY - 1;
                         } else {
                             y = firstY + 1;
                         }
                     }
                 }
-                System.out.println("Next shoot " + x + "," + y);
             }
+            myApp.playSoundEffect(MyApp.SOUND_ID_FIRE);
             lastShootCell = opponentBoard.getCell(x, y);
             String cellLocation = x + "," + y;
             sendMessage(cellLocation);
@@ -146,6 +144,11 @@ class ComputerPlayer extends AbstractPlayer {
     }
 
     @Override
+    void endGame(String result) {
+        isPlaying = false;
+    }
+
+    @Override
     void displayMessage(String message, String result) {
 
     }
@@ -154,6 +157,7 @@ class ComputerPlayer extends AbstractPlayer {
     void processShootResult(String shipName) {
         // ship being hit by last shot, null if result is MISS
         Ship hitShip = opponentBoard.getShip(shipName);
+        lastShootCell.hit(hitShip);
         if (hitShip != null) { // Not a MISS
             // shoot result is either KILL or HIT
             // result is KILL if the ship was sunk, HIT if it was not
@@ -175,5 +179,6 @@ class ComputerPlayer extends AbstractPlayer {
                 }
             }
         }
+        lastShootCell = null;
     }
 }

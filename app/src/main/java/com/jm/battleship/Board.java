@@ -115,13 +115,6 @@ public class Board implements Serializable {
 					headY = rand.nextInt(SIZE - ship.getSize() + 1);
 				}
 				success = placeShip(ship, cells[headX][headY]);
-				if (success) {
-					System.out.print("Ship " + ship.getId() + " placed at ");
-					for (Cell cell : ship.getLocation()) {
-						System.out.print(cell.getX() + "," + cell.getY() + "  ");
-					}
-					System.out.println("");
-				}
 			}
 		}
 	}

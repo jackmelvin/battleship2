@@ -37,6 +37,8 @@ public class PlaceShipActivity extends AppCompatActivity {
     private float cellSize;
     // start game button
     private Button btStart;
+    // custom application class
+    private MyApp myApp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +49,23 @@ public class PlaceShipActivity extends AppCompatActivity {
         init();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        myApp.pauseMusic();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        myApp.resumeMusic();
+    }
+
     private void init() {
+        // init myApp for music and sound
+        myApp = (MyApp) getApplication();
+        // play background music
+        myApp.playMusic(MyApp.MUSIC_ID_PLACE);
         // find and attach components
         ivShips = new ImageView[5];
         ivShips[0] = findViewById(R.id.iv_carrier);
@@ -127,11 +145,11 @@ public class PlaceShipActivity extends AppCompatActivity {
             this.id = id;
         }
 
-        @SuppressLint("ClickableViewAccessibility")
         @Override
         public boolean onTouch(View touchedShip, MotionEvent touchEvent) {
             int action = touchEvent.getAction();
             if (action == MotionEvent.ACTION_DOWN && !isDragging) {
+                myApp.playSoundEffect(MyApp.SOUND_ID_PICKUP);
                 selectedShip = board.getShip(id);
                 if (selectedShip.isPlaced()) {
                     selectedShipOriginalLocation = selectedShip.getHeadCell();
@@ -188,6 +206,8 @@ public class PlaceShipActivity extends AppCompatActivity {
                     View ivShip = (View) event.getLocalState();
 
                     if(headCell != null && ivShip != null && board.placeShip(selectedShip, headCell)) {
+                        // Play sound effect
+                        myApp.playSoundEffect(MyApp.SOUND_ID_PLACE);
                         //Drop the ship on the boardView
                         ViewGroup.LayoutParams originalParams = ivShip.getLayoutParams();
                         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(originalParams.width, originalParams.height);
@@ -201,6 +221,7 @@ public class PlaceShipActivity extends AppCompatActivity {
                         ivShips[selectedShip.getId()] = (ImageView) ivShip;
                         ivShip.setVisibility(View.VISIBLE);
                     } else {
+                        myApp.playSoundEffect(MyApp.SOUND_ID_BLOCKED);
                         //Can't place ship
                         //Display warning message
                         displayMessage("Can't place ship");
@@ -230,6 +251,8 @@ public class PlaceShipActivity extends AppCompatActivity {
             //myApp.playSoundEffect(MyApp.SOUND_ID_PLACE);
             if(selectedShip != null && selectedShip.isPlaced()) {
                 if (board.rotateShip(selectedShip)) {
+                    // Play sound effect
+                    myApp.playSoundEffect(MyApp.SOUND_ID_PLACE);
                     ImageView ivShip = ivShips[selectedShip.getId()];
                     //Resize ship view to match ship's direction
                     RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) ivShip.getLayoutParams();
@@ -245,6 +268,7 @@ public class PlaceShipActivity extends AppCompatActivity {
                     displayMessage("Can't place ship");
                 }
             } else {
+                myApp.playSoundEffect(MyApp.SOUND_ID_BLOCKED);
                 //No ship selected or selected ship hasn't been placed on board
                 //Display warning message
                 displayMessage("No ship selected or selected ship hasn't been placed on board");
@@ -255,7 +279,7 @@ public class PlaceShipActivity extends AppCompatActivity {
     private class RandomListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-//            myApp.playSoundEffect(MyApp.SOUND_ID_PLACE);
+            myApp.playSoundEffect(MyApp.SOUND_ID_PLACE);
             // Deselect ship
             selectedShip = null;
             // Place ships randomly
@@ -290,10 +314,12 @@ public class PlaceShipActivity extends AppCompatActivity {
     private class StartListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
+            myApp.playSoundEffect(MyApp.SOUND_ID_GAME_START);
             Intent intent = new Intent(PlaceShipActivity.this, GamePlayActivity.class);
             intent.putExtra("mode", mode);
             intent.putExtra("board", board);
             startActivity(intent);
+            finish();
         }
     }
 }

@@ -9,18 +9,27 @@ import android.os.Build;
 
 public class MyApp extends Application {
     private MediaManager mediaManager;
-    private static SoundPool soundPool;
+    private SoundPool soundPool;
     private boolean isMusicOn;
     private boolean isSoundOn;
-    private SharedPreferences sharedPref;
-    public static final int SOUND_ID_GAME_START = 0;
-    public static final int SOUND_ID_PLACE = 1;
-    public static final int SOUND_ID_HIT = 2;
-    public static final int SOUND_ID_MISS = 3;
-    public static final int SOUND_ID_FIRE = 4;
-    public static final int SOUND_ID_PICKUP = 5;
-    public static final int SOUND_ID_WIN = 6;
-    public static final int SOUND_ID_LOOSE = 7;
+    public static int SOUND_ID_GAME_START;
+    public static int SOUND_ID_PLACE;
+    public static int SOUND_ID_HIT;
+    public static int SOUND_ID_MISS;
+    public static int SOUND_ID_FIRE;
+    public static int SOUND_ID_PICKUP;
+    public static int SOUND_ID_WIN;
+    public static int SOUND_ID_LOSE;
+    public static int SOUND_ID_BLOCKED;
+    public static int MUSIC_ID_START = R.raw.bg_music_start;
+    public static int MUSIC_ID_PLAY = R.raw.bg_music_play;
+    public static int MUSIC_ID_PLACE = R.raw.bg_music_place;
+    final float LEFT_VOLUME_VALUE = 1.0f;
+    final float RIGHT_VOLUME_VALUE = 1.0f;
+    final int MUSIC_LOOP = 0;
+    final int SOUND_PLAY_PRIORITY = 0;
+    final float PLAY_RATE= 1.0f;
+    SharedPreferences sharedPref;
 
     @Override
     public void onCreate() {
@@ -47,9 +56,9 @@ public class MyApp extends Application {
     private void initSoundAndMusic() {
         //SharedPreferences for saving game settings
         sharedPref = getSharedPreferences("settings", Context.MODE_PRIVATE);
-                //Load switch checked status
-        isMusicOn = sharedPref.getBoolean("music", false);
-        isSoundOn = sharedPref.getBoolean("sound", false);
+        //Load switch checked status
+        isMusicOn = sharedPref.getBoolean("music", true);
+        isSoundOn = sharedPref.getBoolean("sound", true);
 
         //Initialize MediaManager for BGM
         mediaManager = new MediaManager(this);
@@ -63,55 +72,56 @@ public class MyApp extends Application {
             // Deprecated way of creating a SoundPool before Android API 21.
             soundPool = new SoundPool(NUMBER_OF_SIMULTANEOUS_SOUNDS, AudioManager.STREAM_MUSIC, 0);
         }
+        // initialize sound effects
+        SOUND_ID_GAME_START = soundPool.load(getApplicationContext(), R.raw.se_game_start, 1);
+        SOUND_ID_PLACE = soundPool.load(getApplicationContext(), R.raw.se_place, 1);
+        SOUND_ID_HIT = soundPool.load(getApplicationContext(), R.raw.se_hit, 1);
+        SOUND_ID_MISS = soundPool.load(getApplicationContext(), R.raw.se_miss, 1);
+        SOUND_ID_FIRE = soundPool.load(getApplicationContext(), R.raw.se_fire, 1);
+        SOUND_ID_PICKUP = soundPool.load(getApplicationContext(), R.raw.se_pickup, 1);
+        SOUND_ID_WIN = soundPool.load(getApplicationContext(), R.raw.se_win, 1);
+        SOUND_ID_LOSE = soundPool.load(getApplicationContext(), R.raw.se_lose, 1);
+        SOUND_ID_BLOCKED = soundPool.load(getApplicationContext(), R.raw.se_block, 1);
+    }
+
+    public void saveSettings() {
+        if (sharedPref == null) {
+            sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
+        }
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean("music", isMusicOn);
+        editor.putBoolean("sound", isSoundOn);
+        editor.apply();
     }
 
     public void playSoundEffect(int soundId) {
-        if(!isSoundOn) {
+        if(!isSoundOn || soundPool == null) {
             return;
-        }
-        final float LEFT_VOLUME_VALUE = 1.0f;
-        final float RIGHT_VOLUME_VALUE = 1.0f;
-        final int MUSIC_LOOP = 0;
-        final int SOUND_PLAY_PRIORITY = 0;
-        final float PLAY_RATE= 1.0f;
-        switch (soundId) {
-            case SOUND_ID_GAME_START:
-                soundId = soundPool.load(getApplicationContext(), R.raw.se_game_start, 1);
-                break;
-            case SOUND_ID_PLACE:
-                soundId = soundPool.load(getApplicationContext(), R.raw.se_place, 1);
-                break;
-            case SOUND_ID_HIT:
-                soundId = soundPool.load(getApplicationContext(), R.raw.se_hit, 1);
-                break;
-            case SOUND_ID_MISS:
-                soundId = soundPool.load(getApplicationContext(), R.raw.se_miss, 1);
-                break;
-            case SOUND_ID_FIRE:
-                soundId = soundPool.load(getApplicationContext(), R.raw.se_fire, 1);
-                break;
-            case SOUND_ID_PICKUP:
-                soundId = soundPool.load(getApplicationContext(), R.raw.se_pickup, 1);
-                break;
-            case SOUND_ID_WIN:
-                soundId = soundPool.load(getApplicationContext(), R.raw.se_win, 1);
-                break;
-            case SOUND_ID_LOOSE:
-                soundId = soundPool.load(getApplicationContext(), R.raw.se_loose, 1);
-                break;
         }
         soundPool.play(soundId, LEFT_VOLUME_VALUE, RIGHT_VOLUME_VALUE, SOUND_PLAY_PRIORITY, MUSIC_LOOP, PLAY_RATE);
     }
 
-    public void loadMusic(int musicId) {
-        mediaManager.load(musicId);
+    public void releaseSoundPool() {
+        if (soundPool != null) {
+            soundPool.release();
+        }
     }
 
-    public void playMusic() {
-        mediaManager.play();
+    public void playMusic(int musicId) {
+        if (isMusicOn) {
+            mediaManager.play(musicId);
+        }
     }
 
     public void pauseMusic() {
         mediaManager.pause();
+    }
+
+    public void resumeMusic() {
+        mediaManager.resume();
+    }
+
+    public void releaseMediaPlayer() {
+        mediaManager.release();
     }
 }

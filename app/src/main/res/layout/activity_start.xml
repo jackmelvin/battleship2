@@ -7,6 +7,7 @@
     tools:context=".StartActivity">
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -19,13 +20,32 @@
             android:id="@+id/bt_play_vs_player"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:maxLines="1"
             android:text="Play Against Another Player" />
 
         <Button
             android:id="@+id/bt_play_vs_computer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:maxLines="1"
             android:text="Play against computer" />
 
     </LinearLayout>
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/sw_music"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Music"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayout"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/sw_sound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sound"
+        app:layout_constraintEnd_toEndOf="@+id/sw_music"
+        app:layout_constraintTop_toBottomOf="@+id/sw_music" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

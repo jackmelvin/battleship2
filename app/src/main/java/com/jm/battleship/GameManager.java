@@ -20,7 +20,7 @@ class GameManager {
 
     Player me;
 
-    GameManager(int mode, GamePlayActivity activity, BoardView myBoardView, BoardView opponentBoardView) {
+    GameManager(int mode, GamePlayActivity activity, Board myBoard, Board opponentBoard) {
         String ip;
         int port;
         if (mode == MODE_VS_PLAYER) {
@@ -29,9 +29,11 @@ class GameManager {
         } else {
             ip = "127.0.0.1";
             port = new GameOnDeviceServer().start();
-            opponentBoardView.getBoard().placeShipsRandomly();
-            new ComputerPlayer(ip, port, activity, opponentBoardView, myBoardView);
+            Board comBoard = new Board();
+            Board comOpponentBoard = new Board();
+            comBoard.placeShipsRandomly();
+            new ComputerPlayer(ip, port, activity, comBoard, comOpponentBoard);
         }
-        me = new Player(ip, port, activity, myBoardView, opponentBoardView);
+        me = new Player(ip, port, activity, myBoard, opponentBoard);
     }
 }
