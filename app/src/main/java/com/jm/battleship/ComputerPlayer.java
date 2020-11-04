@@ -142,6 +142,13 @@ class ComputerPlayer extends AbstractPlayer {
     void _wait() {}
 
     @Override
+    void playSoundEffect(int soundId) {
+        if (soundId != MyApp.SOUND_ID_GAME_START) {
+            myApp.playSoundEffect(soundId);
+        }
+    }
+
+    @Override
     void endGame(String result) {
         isPlaying = false;
     }

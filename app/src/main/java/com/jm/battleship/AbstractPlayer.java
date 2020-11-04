@@ -102,12 +102,17 @@ public abstract class AbstractPlayer {
 
     // check and process commands received from the game server
     final void checkCommand(String command) {
+        if (command == null) {
+            isPlaying = false;
+            displayMessage("Networking error", "Game ended");
+            return;
+        }
         switch (command) {
             case READY:
                 sendMessage(READY);
                 break;
             case START:
-                myApp.playSoundEffect(MyApp.SOUND_ID_GAME_START);
+                playSoundEffect(MyApp.SOUND_ID_GAME_START);
                 break;
             case NULL:
             case OPPONENT_DISCONNECTED:
@@ -128,7 +133,7 @@ public abstract class AbstractPlayer {
                 break;
             //Shoot result
             case MISS:
-                myApp.playSoundEffect(MyApp.SOUND_ID_MISS);
+                playSoundEffect(MyApp.SOUND_ID_MISS);
                 processShootResult(command);
                 break;
             case CARRIER:
@@ -136,7 +141,7 @@ public abstract class AbstractPlayer {
             case CRUISER:
             case SUBMARINE:
             case DESTROYER:
-                myApp.playSoundEffect(MyApp.SOUND_ID_HIT);
+                playSoundEffect(MyApp.SOUND_ID_HIT);
                 processShootResult(command);
                 break;
             default: // cell location in "row, column" format
@@ -144,6 +149,8 @@ public abstract class AbstractPlayer {
         }
         activity.reDrawBoardViews();
     }
+
+    abstract void playSoundEffect(int soundId);
 
     abstract void endGame(String result);
 

@@ -31,22 +31,24 @@ class GameManager {
             port = 5228;
         } else {
             ip = "127.0.0.1";
-            GameOnDeviceServer gameOnDeviceServer = new GameOnDeviceServer();
+            gameOnDeviceServer = new GameOnDeviceServer();
             port = gameOnDeviceServer.start();
             Board comBoard = new Board();
             Board comOpponentBoard = new Board();
             comBoard.placeShipsRandomly();
             com = new ComputerPlayer(ip, port, activity, comBoard, comOpponentBoard);
+            System.out.println("com connected");
             ((MyApp)activity.getApplication()).playSoundEffect(MyApp.SOUND_ID_GAME_START);
         }
         me = new Player(ip, port, activity, myBoard, opponentBoard);
+        System.out.println("me connected");
     }
 
     void end() {
         me.close();
         if (com != null && gameOnDeviceServer != null) {
-            gameOnDeviceServer.endGame();
             com.close();
+            gameOnDeviceServer.endGame();
         }
     }
 }

@@ -4,9 +4,12 @@ import java.io.*;
 import java.net.*;
 import java.util.Random;
 
+import static com.jm.battleship.GameManager.*;
+
 class GameOnDeviceServer implements Runnable {
 	private int port = 5228;
-	private boolean serverStarted = false;
+	private volatile boolean serverStarted = false;
+	private ServerSocket serverSock;
 	private GamePlay game;
 
 	int start() {
@@ -18,7 +21,7 @@ class GameOnDeviceServer implements Runnable {
 
 	@Override
 	public void run() {
-		ServerSocket serverSock = null;
+		serverSock = null;
 		while (serverSock == null && port <= 65535) {
 			try {
 				serverSock = new ServerSocket(port);
@@ -34,11 +37,15 @@ class GameOnDeviceServer implements Runnable {
 		try {
 			int connectedPlayerNum = 0;
 			Socket[] players = new Socket[2];
+			PrintWriter[] writers = new PrintWriter[2];
+			BufferedReader[] readers = new BufferedReader[2];
 			while (connectedPlayerNum < 2) {
 				players[connectedPlayerNum] = serverSock.accept();
+				writers[connectedPlayerNum] = new PrintWriter(players[connectedPlayerNum].getOutputStream());
+				readers[connectedPlayerNum] = new BufferedReader(new InputStreamReader(players[connectedPlayerNum].getInputStream()));
 				connectedPlayerNum++;
 				if (connectedPlayerNum == 2) {
-					game = new GamePlay(players);
+					game = new GamePlay(writers, readers);
 				}
 			}
 		} catch (IOException e) {
@@ -47,40 +54,32 @@ class GameOnDeviceServer implements Runnable {
 	}
 
 	void endGame() {
-		game.endGame();
+		if (game != null) {
+			game.endGame();
+		}
+		if (serverSock != null) {
+			try {
+				serverSock.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	static class GamePlay {
-		public static final String SHOOT = "Shoot";
-		public static final String WAIT = "Wait";
-		public static final String LOSE = "Lose";
-		public static final String WIN = "Win";
-		public static final String MISS = "Miss";
-		public static final String OPPONENT_DISCONNECTED = "OpponentDisconnected";
-		Socket[] players;
-		PrintWriter[] out;
-		BufferedReader[] in;
+		PrintWriter[] writers;
+		BufferedReader[] readers;
 		int shootingPlayer;
 		int waitingPlayer;
 		boolean isPlaying = true;
 
-		public GamePlay(Socket[] players) {
-			this.players = players;
+		public GamePlay(PrintWriter[] writers, BufferedReader[] readers) {
+			this.writers = writers;
+			this.readers = readers;
 			setUpGame();
 		}
 
 		void setUpGame() {
-			try {
-				out = new PrintWriter[2];
-				out[0] = new PrintWriter(players[0].getOutputStream());
-				out[1] = new PrintWriter(players[1].getOutputStream());
-				in = new BufferedReader[2];
-				in[0] = new BufferedReader(new InputStreamReader(players[0].getInputStream()));
-				in[1] = new BufferedReader(new InputStreamReader(players[1].getInputStream()));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
 			Random rand = new Random();
 			shootingPlayer = rand.nextInt(2);
 			if (shootingPlayer == 0) {
@@ -93,27 +92,30 @@ class GameOnDeviceServer implements Runnable {
 		}
 
 		private void startGame() {
+			write(0, START);
+			write(1, START);
 			while (isPlaying) {
 				tellPlayerToShoot();
 			}
 		}
 
 		private void write(int playerToWriteTo, String command) {
-			out[playerToWriteTo].println(command);
-			out[playerToWriteTo].flush();
+			writers[playerToWriteTo].println(command);
+			writers[playerToWriteTo].flush();
 		}
 
 		private String read(int playerToReadFrom) {
-			String command = null;
+			String command;
 			try {
-				command = in[playerToReadFrom].readLine();
+				command = readers[playerToReadFrom].readLine();
 				if (command == null) {
 					// client disconnected
-					int playerToWrite = (playerToReadFrom == 0) ? 1 : 0;
-					write(playerToWrite, OPPONENT_DISCONNECTED);
-					isPlaying = false;
+					command = OPPONENT_DISCONNECTED;
+					endGame();
 				}
-			} catch (Exception e) {
+			} catch (IOException e) {
+				command = OPPONENT_DISCONNECTED;
+				endGame();
 				e.printStackTrace();
 			}
 			return command;
@@ -130,9 +132,9 @@ class GameOnDeviceServer implements Runnable {
 				endGame();
 			} else {
 				write(shootingPlayer, result);
-			}
-			if (result.equals(MISS)) {
-				endTurn();
+				if (result.equals(MISS)) {
+					endTurn();
+				}
 			}
 		}
 
@@ -153,6 +155,12 @@ class GameOnDeviceServer implements Runnable {
 
 		private void endGame() {
 			isPlaying = false;
+			if (writers[0] != null) {
+				writers[0].close();
+			}
+			if (writers[1] != null) {
+				writers[1].close();
+			}
 		}
 	}
 }

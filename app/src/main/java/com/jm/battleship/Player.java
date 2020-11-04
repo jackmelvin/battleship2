@@ -19,6 +19,11 @@ public class Player extends AbstractPlayer {
     }
 
     @Override
+    void playSoundEffect(int soundId) {
+        myApp.playSoundEffect(soundId);
+    }
+
+    @Override
     void endGame(String result) {
         if (result.equals(GameManager.WIN)) {
             displayMessage("You win", "GGWP");
