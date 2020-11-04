@@ -4,6 +4,7 @@ class GameManager {
     public static final int MODE_VS_PLAYER = 0;
     public static final int MODE_VS_COMPUTER = 1;
     public static final String READY = "Ready";
+    public static final String START = "Start";
     public static final String SHOOT = "Shoot";
     public static final String WAIT = "Wait";
     public static final String WIN = "Win";
@@ -20,28 +21,31 @@ class GameManager {
     public static final String OPPONENT_DISCONNECTED = "OpponentDisconnected";
     Player me;
     ComputerPlayer com;
+    GameOnDeviceServer gameOnDeviceServer;
 
     GameManager(int mode, GamePlayActivity activity, Board myBoard, Board opponentBoard) {
         String ip;
         int port;
         if (mode == MODE_VS_PLAYER) {
-//            ip = "ec2-52-195-7-157.ap-northeast-1.compute.amazonaws.com";
-            ip = "192.168.196.157";
+            ip = "ec2-52-195-7-157.ap-northeast-1.compute.amazonaws.com";
             port = 5228;
         } else {
             ip = "127.0.0.1";
-            port = new GameOnDeviceServer().start();
+            GameOnDeviceServer gameOnDeviceServer = new GameOnDeviceServer();
+            port = gameOnDeviceServer.start();
             Board comBoard = new Board();
             Board comOpponentBoard = new Board();
             comBoard.placeShipsRandomly();
             com = new ComputerPlayer(ip, port, activity, comBoard, comOpponentBoard);
+            ((MyApp)activity.getApplication()).playSoundEffect(MyApp.SOUND_ID_GAME_START);
         }
         me = new Player(ip, port, activity, myBoard, opponentBoard);
     }
 
     void end() {
         me.close();
-        if (com != null) {
+        if (com != null && gameOnDeviceServer != null) {
+            gameOnDeviceServer.endGame();
             com.close();
         }
     }

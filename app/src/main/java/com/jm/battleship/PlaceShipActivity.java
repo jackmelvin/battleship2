@@ -50,6 +50,12 @@ public class PlaceShipActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        myApp.saveSettings();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         myApp.pauseMusic();
@@ -314,7 +320,6 @@ public class PlaceShipActivity extends AppCompatActivity {
     private class StartListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            myApp.playSoundEffect(MyApp.SOUND_ID_GAME_START);
             Intent intent = new Intent(PlaceShipActivity.this, GamePlayActivity.class);
             intent.putExtra("mode", mode);
             intent.putExtra("board", board);

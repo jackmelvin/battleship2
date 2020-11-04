@@ -7,6 +7,7 @@ import java.util.Random;
 class GameOnDeviceServer implements Runnable {
 	private int port = 5228;
 	private boolean serverStarted = false;
+	private GamePlay game;
 
 	int start() {
 		Thread t = new Thread(this);
@@ -37,12 +38,16 @@ class GameOnDeviceServer implements Runnable {
 				players[connectedPlayerNum] = serverSock.accept();
 				connectedPlayerNum++;
 				if (connectedPlayerNum == 2) {
-					new GamePlay(players);
+					game = new GamePlay(players);
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	void endGame() {
+		game.endGame();
 	}
 
 	static class GamePlay {
@@ -85,10 +90,6 @@ class GameOnDeviceServer implements Runnable {
 			}
 
 			startGame();
-
-			//getp1board
-			//getp2board
-			//send enemy board to each player
 		}
 
 		private void startGame() {
@@ -108,8 +109,8 @@ class GameOnDeviceServer implements Runnable {
 				command = in[playerToReadFrom].readLine();
 				if (command == null) {
 					// client disconnected
-					int playToWrite = (playerToReadFrom == 0) ? 1 : 0;
-					write(playToWrite, OPPONENT_DISCONNECTED);
+					int playerToWrite = (playerToReadFrom == 0) ? 1 : 0;
+					write(playerToWrite, OPPONENT_DISCONNECTED);
 					isPlaying = false;
 				}
 			} catch (Exception e) {

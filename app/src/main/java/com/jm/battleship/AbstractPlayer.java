@@ -18,6 +18,7 @@ import static com.jm.battleship.GameManager.NULL;
 import static com.jm.battleship.GameManager.OPPONENT_DISCONNECTED;
 import static com.jm.battleship.GameManager.READY;
 import static com.jm.battleship.GameManager.SHOOT;
+import static com.jm.battleship.GameManager.START;
 import static com.jm.battleship.GameManager.SUBMARINE;
 import static com.jm.battleship.GameManager.WAIT;
 import static com.jm.battleship.GameManager.WIN;
@@ -104,6 +105,9 @@ public abstract class AbstractPlayer {
         switch (command) {
             case READY:
                 sendMessage(READY);
+                break;
+            case START:
+                myApp.playSoundEffect(MyApp.SOUND_ID_GAME_START);
                 break;
             case NULL:
             case OPPONENT_DISCONNECTED:

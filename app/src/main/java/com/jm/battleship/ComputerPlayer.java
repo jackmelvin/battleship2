@@ -139,9 +139,7 @@ class ComputerPlayer extends AbstractPlayer {
     }
 
     @Override
-    void _wait() {
-
-    }
+    void _wait() {}
 
     @Override
     void endGame(String result) {
@@ -149,9 +147,7 @@ class ComputerPlayer extends AbstractPlayer {
     }
 
     @Override
-    void displayMessage(String message, String result) {
-
-    }
+    void displayMessage(String message, String result) {}
 
     @Override
     void processShootResult(String shipName) {

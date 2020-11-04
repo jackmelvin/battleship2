@@ -49,6 +49,7 @@ public class GamePlayActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        myApp.saveSettings();
         game.end();
     }
 
