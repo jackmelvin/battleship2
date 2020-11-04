@@ -16,6 +16,7 @@ import static com.jm.battleship.GameManager.LOSE;
 import static com.jm.battleship.GameManager.MISS;
 import static com.jm.battleship.GameManager.NULL;
 import static com.jm.battleship.GameManager.OPPONENT_DISCONNECTED;
+import static com.jm.battleship.GameManager.READY;
 import static com.jm.battleship.GameManager.SHOOT;
 import static com.jm.battleship.GameManager.SUBMARINE;
 import static com.jm.battleship.GameManager.WAIT;
@@ -101,6 +102,9 @@ public abstract class AbstractPlayer {
     // check and process commands received from the game server
     final void checkCommand(String command) {
         switch (command) {
+            case READY:
+                sendMessage(READY);
+                break;
             case NULL:
             case OPPONENT_DISCONNECTED:
                 isPlaying = false;
@@ -192,6 +196,13 @@ public abstract class AbstractPlayer {
                 writer.flush();
             }
             return null;
+        }
+    }
+
+    void close() {
+        isPlaying = false;
+        if (writer != null) {
+            writer.close();
         }
     }
 

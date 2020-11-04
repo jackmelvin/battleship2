@@ -47,6 +47,12 @@ public class GamePlayActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        game.end();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         myApp.pauseMusic();
